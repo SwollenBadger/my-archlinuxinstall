@@ -133,7 +133,6 @@ swap_method_prompt(){
 }
 
 swap_partition_prompt(){
-  echo -e
   print_color $CYAN "Enter your swap device either your swap partition (/dev/xxx) or swapfile (swapfile has to be /swapfile): "
   read SWAP_PARTITION
 
@@ -217,6 +216,7 @@ print_summary(){
   else
     echo -e "Yes"
   fi
+
   print_color $GREEN "Bootloader: "
   if [[ "$BOOTLOADER" == "1" ]]; then
     echo "Grub"
@@ -224,5 +224,14 @@ print_summary(){
     echo "Systemd-boot"
   else
     echo -e "Failed to get bootloader"
+  fi
+
+  print_color $CYAN "Please check again, your configuration before continue"
+  sleep 3
+  print_color $CYAN "Continue ? "
+  read -n1 -r CONTINUE
+
+  if [[ "$CONTINUE" =~ [Nn] ]]; then
+    exit 0
   fi
 }
