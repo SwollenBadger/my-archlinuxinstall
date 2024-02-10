@@ -49,7 +49,6 @@ locale_config
 network
 adduser
 bootloader
-install_config
 
 setting_swap
 setting_powerbutton

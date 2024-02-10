@@ -38,7 +38,7 @@ timezone_prompt(){
 
 user_prompt(){
   # -- Create username
-  print_color $CYAN "Enter your username: "
+  print_color $CYAN "- Enter your username: "
   read USERNAME
   if [[ -z "$USERNAME" ]]; then
     error "This option cannot be empty, run script again\n"
@@ -48,7 +48,7 @@ user_prompt(){
 
 user_password_prompt(){
   # -- Set user password
-  print_color $CYAN "Enter your username password (It will visible throughout install, be careful): "
+  print_color $CYAN "- Enter your username password (It will visible throughout install, be careful): "
   read USER_PASSWORD
   if [[ -z "$USER_PASSWORD" ]]; then
     error "This option cannot be empty, run script again\n"
@@ -58,13 +58,13 @@ user_password_prompt(){
 
 root_password_prompt(){
   # -- Set root password
-  print_color $CYAN "Enter your root password (It will visible throughout install, be careful): "
+  print_color $CYAN "- Enter your root password (It will visible throughout install, be careful): "
   read ROOT_PASSWORD
 }
 
 hostname_prompt(){
   # -- Set hostname
-  print_color $CYAN "Enter your hostname: "
+  print_color $CYAN "- Enter your hostname: "
   read HOSTNAME
   if [[ -z "$HOSTNAME" ]]; then
     error "This option cannot be empty, run script again\n"
@@ -76,7 +76,7 @@ efi_partition_prompt(){
   # -- Select EFI partition 
   echo -e 
   lsblk -o name,start,size,type,fstype 
-  print_color $CYAN "Pick your efi partition, (/dev/xxx): "
+  print_color $CYAN "- Pick your efi partition, (/dev/xxx): "
   read EFI_PARTITION
 
   if [[ -z "$EFI_PARTITION" ]]; then
@@ -99,7 +99,7 @@ efi_partition_prompt(){
 
 root_partition_prompt(){
   # -- Set ROOT partition
-  print_color $CYAN "Pick your root partition, all DATA wil be ERASED and FORMAT, (/dev/xxx): "
+  print_color $CYAN "- Pick your root partition, all DATA wil be ERASED and FORMAT, (/dev/xxx): "
   read ROOT_PARTITION
 
   if [[ -z "$ROOT_PARTITION" ]]; then
@@ -114,7 +114,7 @@ root_partition_prompt(){
 
   if [ -n "$(blkid -s TYPE -o value $ROOT_PARTITION)" ];then 
     warn "$ROOT_PARTITION have fstype of $(blkid -s TYPE -o value $ROOT_PARTITION) will be FORMATED and ERASED for ROOT partition\n"
-    warn "If this is a mistake ABORT by pressing ctrl-c"
+    warn "If this is a mistake ABORT by pressing ctrl-c\n"
   fi
 }
 
@@ -122,7 +122,7 @@ swap_method_prompt(){
   # -- Select The way swap
   print_color $WHITE "1) SWAP\n"
   print_color $WHITE "2) Zram\n"
-  print_color $CYAN "Choose your swap method, pick other if you don't want to swap: " 
+  print_color $CYAN "- Choose your swap method, pick other if you don't want to swap: " 
   read -n1 -r SWAP_METHOD
 
   if [[ ! "$SWAP_METHOD" =~ [12] ]]; then
@@ -133,7 +133,7 @@ swap_method_prompt(){
 }
 
 swap_partition_prompt(){
-  print_color $CYAN "Enter your swap device either your swap partition (/dev/xxx) or swapfile (swapfile has to be /swapfile): "
+  print_color $CYAN "- Enter your swap device either your swap partition (/dev/xxx) or swapfile (swapfile has to be /swapfile): "
   read SWAP_PARTITION
 
   if [[ -z "$SWAP_PARTITION" ]]; then
@@ -154,7 +154,7 @@ swap_partition_prompt(){
 }
 
 hibernation_prompt(){
-  print_color $CYAN "Configure hibernation (yes/no) "
+  print_color $CYAN "- Configure hibernation (yes/no) "
   read -n1 -r HIBERNATION
 }
 
@@ -162,13 +162,14 @@ bootloader_prompt(){
   # -- Select Botloader 
   print_color $WHITE "1) Grub\n"
   print_color $WHITE "2) Systemd-boot\n"
-  print_color $CYAN "Choose your bootloader: " 
+  print_color $CYAN "- Choose your bootloader: " 
   read -n1 -r BOOTLOADER
 
   if [[ -z "$BOOTLOADER" ]]; then
     print_color $RED "This option cannot be empty, run script again\n"
     exit 0
   fi
+
   if ! [[ "$BOOTLOADER" =~ [12] ]]; then
     print_color $RED "\nChoice INVALID"
     exit 0
@@ -226,12 +227,13 @@ print_summary(){
     echo -e "Failed to get bootloader"
   fi
 
-  print_color $CYAN "Please check again, your configuration before continue"
+  print_color $CYAN "- Please check again, your configuration before continue\n"
   sleep 3
   print_color $CYAN "Continue ? "
   read -n1 -r CONTINUE
 
   if [[ "$CONTINUE" =~ [Nn] ]]; then
+    echo -e
     exit 0
   fi
 }

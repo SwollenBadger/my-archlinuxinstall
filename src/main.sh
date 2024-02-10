@@ -55,9 +55,9 @@ setup_partition(){
   AUDIO_PACKAGE="pipewire pipewire-pulse pipewire-jack pipewire-alsa wireplumber"
   OTHER_PACKAGE="git vim zsh"
 
-  if [[ $BLDR -eq 1 ]]; then
+  if [[ $BOOTLOADER == "1" ]]; then
     BOOTLOADER_PACKAGE="grub os-prober efibootmgr dosfstools mtools"
-  elif [[ $BLDR -eq 2 ]]; then
+  elif [[ $BLDR == "2" ]]; then
     BOOTLOADER_PACKAGE="efibootmgr dosfstools mtools"
   else
     echo -e "Failed to get bootloader"
@@ -220,9 +220,9 @@ systemd(){
 }
 
 bootloader(){
-  if [[ $BLDR == "1" ]];then
+  if [[ $BOOTLOADER == "1" ]];then
     grub
-  elif [[ $BLDR == "2" ]]; then
+  elif [[ $BOOTLOADER == "2" ]]; then
     systemd
   else
     print_color $RED "INVALID bootloader choice\n"
