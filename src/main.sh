@@ -1,4 +1,7 @@
 prep(){
+  echo -e
+  print_color $MAGENTA "Setting pacman and reflector... \n"
+
   if [[ ! -e /etc/pacman.d/mirrorlist.bak ]]; then
     cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
 
@@ -26,13 +29,13 @@ prep(){
 }
 
 setup_partition(){
-  clear
-  print_color $BLUE "Preparing your partition... \n"
+  echo -e
+  print_color $MAGENTA "Preparing your partition... \n"
   sleep 3
 
-  umount $ESP_MOUNT_POINT || true
-  umount $MOUNT_POINT/boot/efi || true
-  umount $MOUNT_POINT -R || true
+  umount $ESP_MOUNT_POINT 2>/dev/null || true
+  umount $MOUNT_POINT/boot/efi 2>/dev/null || true
+  umount $MOUNT_POINT -R 2>/dev/null || true
 
   delete_efi_entry "Linux Boot Manager"
   delete_efi_entry "Archlinux"  
@@ -45,6 +48,7 @@ setup_partition(){
   mount $ROOT_PARTITION $MOUNT_POINT
   mount $EFI_PARTITION $ESP_MOUNT_POINT --mkdir
 
+  rm -rf $MOUNT_POINT/boot/{EFI/systemd,EFI/Archlinux,*.img,loader,vmlinuz-linux,grub} 2>/dev/null || true
   rm -rf $ESP_MOUNT_POINT/{EFI/systemd,EFI/Archlinux,*.img,loader,vmlinuz-linux,grub} 2>/dev/null || true
 
   BASE_PACKAGE="base base-devel sudo linux linux-headers linux-firmware openssl"
@@ -60,7 +64,7 @@ setup_partition(){
   elif [[ $BLDR == "2" ]]; then
     BOOTLOADER_PACKAGE="efibootmgr dosfstools mtools"
   else
-    echo -e "Failed to get bootloader"
+    error "Failed to get bootloader"
   fi
 
   if [[ "$CPU_VENDOR" == "GenuineIntel" ]]; then
@@ -89,8 +93,8 @@ setup_partition(){
 }
 
 locale_config(){
-  clear
-  print_color $BLUE "Setting locale and language...\n"
+  echo -e
+  print_color $MAGENTA "Setting locale and language...\n"
 
   ln -sf /usr/share/zoneinfo/$TIME_ZONE $MOUNT_POINT/etc/localtime
   timedatectl set-ntp true || true
@@ -120,7 +124,7 @@ locale_config(){
 }
 
 network(){
-  clear
+  echo -e
   print_color $MAGENTA "Setting network...\n"
 
   echo "$HOSTNAME" > $MOUNT_POINT/etc/hostname
@@ -135,7 +139,7 @@ network(){
 }
 
 adduser(){
-  clear
+  echo -e
   print_color $MAGENTA "Adding user...\n"
 
   useradd -mG wheel -R $MOUNT_POINT $USERNAME || true
@@ -152,8 +156,8 @@ adduser(){
 }
 
 grub(){
-  clear
-  print_color $BLUE "Mounting efi parition\n"
+  echo -e
+  print_color $MAGENTA "Mounting efi parition...\n"
 
   ROOT_ID=$(blkid -s UUID -o value $ROOT_PARTITION)
 
@@ -186,8 +190,8 @@ grub(){
 }
 
 systemd(){
-  clear
-  print_color $BLUE "Mounting efi parition\n"
+  echo -e
+  print_color $MAGENTA "Mounting efi parition\n"
 
   if [ ! -d "$ESP_MOUNT_POINT" ]; then
     echo "EFI System Partition (ESP) not found at $ESP_MOUNT_POINT. Adjust the mount point."

@@ -227,7 +227,7 @@ print_summary(){
     echo -e "Failed to get bootloader"
   fi
 
-  print_color $CYAN "=> Please check again, your configuration before continue\n"
+  print_color $CYAN "=> Please check your configuration before continue\n"
   print_color $CYAN "   Continue ? "
   read -n1 -r CONTINUE
 

@@ -1,12 +1,12 @@
 setting_hibernation_grub(){
-  print_color MAGENTA "Setting hibernation\n"
+  print_color $MAGENTA "Setting hibernation...\n"
 
   if [[ -z "$(grep "resume" $MOUNT_POINT/etc/default/grub)" ]]; then
     EXISTING_OPTIONS=$(grep "GRUB_CMDLINE_LINUX_DEFAULT" $MOUNT_POINT/etc/default/grub | grep -oP '(?<=\")[^\"]+(?=\")')
     # For my hackintosh OpenLinuxBoot
     EXISTING_STUB_OPTIONS=$(grep "options" $MOUNT_POINT/boot/loader/entries/archlinux.conf | sed 's/^options //')
 
-    if [[ $SWAP_DEV == "/swapfile" ]]; then
+    if [[ $SWAP_PARTITION == "/swapfile" ]]; then
       UUID=$(blkid -s UUID -o value $ROOT_PARTITION)
       RES_OFFSET=$(arch-chroot $MOUNT_POINT filefrag -v /swapfile | awk 'NR==4 {gsub(/[^0-9]/, "", $4); print $4}')
 
@@ -14,7 +14,7 @@ setting_hibernation_grub(){
       # For my hackintosh OpenLinuxBoot
       NEW_OPTIONS_STUB="options $EXISTING_STUB_OPTIONS resume=UUID=$UUID resume_offset=$RES_OFFSET"
     else
-      UUID=$(blkid -s UUID -o value $SWAP_DEV)
+      UUID=$(blkid -s UUID -o value $SWAP_PARTITION)
       NEW_OPTIONS="GRUB_CMDLINE_LINUX_DEFAULT=\"$EXISTING_OPTIONS resume=UUID=$UUID\""
       # For my hackintosh OpenLinuxBoot
       NEW_OPTIONS_STUB="options $EXISTING_STUB_OPTIONS resume=UUID=$UUID"
@@ -40,18 +40,18 @@ setting_hibernation_grub(){
 }
 
 setting_hibernation_systemd(){
-  print_color MAGENTA "Setting hibernation\n"
+  print_color $MAGENTA "Setting hibernation...\n"
 
   if [[ -z "$(grep "resume" $MOUNT_POINT/boot/loader/entries/archlinux.conf)" ]]; then
     EXISTING_OPTIONS=$(grep "options" $MOUNT_POINT/boot/loader/entries/archlinux.conf | sed 's/^options //')
 
-    if [[ $SWAP_DEV == "/swapfile" ]]; then
+    if [[ $SWAP_PARTITION == "/swapfile" ]]; then
       UUID=$(blkid -s UUID -o value $ROOT_PARTITION)
       RES_OFFSET=$(arch-chroot $MOUNT_POINT filefrag -v /swapfile | awk 'NR==4 {gsub(/[^0-9]/, "", $4); print $4}')
 
       NEW_OPTIONS="options $EXISTING_OPTIONS resume=UUID=$UUID resume_offset=$RES_OFFSET"
     else
-      UUID=$(blkid -s UUID -o value $SWAP_DEV)
+      UUID=$(blkid -s UUID -o value $SWAP_PARTITION)
       NEW_OPTIONS="options $EXISTING_OPTIONS resume=UUID=$UUID"
     fi
 
@@ -72,7 +72,7 @@ setting_hibernation_systemd(){
 
 zram(){
   echo -e
-  print_color $BLUE "Setting zram with zram generator...\n"
+  print_color $MAGENTA "Setting zram with zram generator...\n"
 
   echo "[zram0]" > $MOUNT_POINT/etc/systemd/zram-generator.conf
   echo "compression-algorithm = zstd" >> $MOUNT_POINT/etc/systemd/zram-generator.conf
@@ -88,7 +88,7 @@ zram(){
 
 swap(){
   echo -e
-  print_color $BLUE "Setting Swap...\n"
+  print_color $MAGENTA "Setting Swap...\n"
 
   # Check for swap partition
   check_swap_partition
@@ -117,7 +117,7 @@ swap(){
 	SWAP_SIZE_HALF=$((TOTAL_RAM / 2))
 	SWAP_SIZE=$SWAP_SIZE_DEFAULT
 
-  if [[ $SWAP_DEV == "/swapfile" ]]; then
+  if [[ $SWAP_PARTITION == "/swapfile" ]]; then
     if [[ ! "$HIBERNATION" =~ [Nn] ]]; then
       SWAP_SIZE=$TOTAL_RAM			
     else
@@ -127,11 +127,11 @@ swap(){
     fi
 
     arch-chroot $MOUNT_POINT dd if=/dev/zero of=/swapfile bs=1M count=$SWAP_SIZE status=progress
-    arch-chroot $MOUNT_POINT chmod 600 $SWAP_DEV
+    arch-chroot $MOUNT_POINT chmod 600 $SWAP_PARTITION
   fi
 
-  arch-chroot $MOUNT_POINT mkswap $SWAP_DEV -f
-  arch-chroot $MOUNT_POINT swapon $SWAP_DEV 
+  arch-chroot $MOUNT_POINT mkswap $SWAP_PARTITION -f
+  arch-chroot $MOUNT_POINT swapon $SWAP_PARTITION 
   
   print_color $GREEN "Swap succesfully created\n"
 
@@ -151,10 +151,8 @@ setting_swap(){
   elif [[ $SWAP_METHOD == "2" ]]; then
     zram
   else
-    print_color $YELLOW "Warn: "
-    print_color $WHITE "INVALID SWAP choice, no swap configured\n"
-    print_color $YELLOW "Warn: "
-    print_color $WHITE "Cannot setting hibernation\n"
+    warn "INVALID SWAP choice, no swap configured\n"
+    warn "Cannot setting hibernation\n"
   fi
 }
 
