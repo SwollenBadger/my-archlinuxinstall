@@ -1,6 +1,5 @@
 source "./src/_vars.sh"
 source "./src/_helpers.sh"
-source "./src/install_config.sh"
 
 source "./src/_prompt.sh"
 source "./src/main.sh"
