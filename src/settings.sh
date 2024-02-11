@@ -167,10 +167,8 @@ setting_powerbutton(){
 
     sudo sed -i 's/^#\(HandlePowerKey=\)poweroff/\1ignore/' $MOUNT_POINT/etc/systemd/logind.conf
 
-    clear
     print_color $GREEN "Powerkey ignored\n"
   else
-    clear
     print_color $GREEN "Powerkey has been ignored\n"
   fi
 

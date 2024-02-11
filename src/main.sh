@@ -1,8 +1,8 @@
 prep(){
   echo -e
-  print_color $MAGENTA "Setting pacman and reflector... \n"
 
   if [[ ! -e /etc/pacman.d/mirrorlist.bak ]]; then
+    print_color $MAGENTA "Setting pacman and reflector... \n"
     cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
 
     reflector --verbose\
@@ -37,6 +37,10 @@ setup_partition(){
   umount $MOUNT_POINT/boot/efi 2>/dev/null || true
   umount $MOUNT_POINT -R 2>/dev/null || true
 
+  if [[ $BOOTLOADER == "2" ]]; then
+    ESP_MOUNT_POINT="$MOUNT_POINT/boot"
+  else
+
   delete_efi_entry "Linux Boot Manager"
   delete_efi_entry "Archlinux"  
 
@@ -61,7 +65,7 @@ setup_partition(){
 
   if [[ $BOOTLOADER == "1" ]]; then
     BOOTLOADER_PACKAGE="grub os-prober efibootmgr dosfstools mtools"
-  elif [[ $BLDR == "2" ]]; then
+  elif [[ $BOOTLOADER == "2" ]]; then
     BOOTLOADER_PACKAGE="efibootmgr dosfstools mtools"
   else
     error "Failed to get bootloader"
@@ -198,7 +202,7 @@ systemd(){
     exit 1
   fi
 
-  bootctl --esp-path=$ESP_MOUNT_POINT --boot-path=$MOUNT_POINT/boot install || true
+  bootctl --esp-path=$ESP_MOUNT_POINT --boot-path=$MOUNT_POINT/boot --root=$MOUNT_POINT install || true
 
   echo "default archlinux*" > "$ESP_MOUNT_POINT/loader/loader.conf"
   echo "timeout 5" >> "$ESP_MOUNT_POINT/loader/loader.conf"
