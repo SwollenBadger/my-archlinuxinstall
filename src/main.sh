@@ -21,8 +21,6 @@ prep(){
     sed -i '/^#ParallelDownloads = 5/s/^#//' /etc/pacman.conf
     sed -i.bak '/^#[[:space:]]*\[multilib\]/,/^#[[:space:]]*Include = \/etc\/pacman.d\/mirrorlist/s/^#//' /etc/pacman.conf
 
-    mkdir -p $MOUNT_POINT/etc/pacman.d/hooks 2>/dev/null
-
     pacman -Sy
   fi
 
@@ -198,6 +196,8 @@ grub(){
 systemd(){
   echo -e
   print_color $MAGENTA "Installing systemd boot...\n"
+
+  mkdir -p $MOUNT_POINT/etc/pacman.d/hooks 2>/dev/null
 
   if [ ! -d "$ESP_MOUNT_POINT" ]; then
     echo "EFI System Partition (ESP) not found at $ESP_MOUNT_POINT. Adjust the mount point."
