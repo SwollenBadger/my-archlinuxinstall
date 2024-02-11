@@ -156,6 +156,11 @@ swap_partition_prompt(){
 hibernation_prompt(){
   print_color $CYAN "=> Configure hibernation (yes/no) "
   read -n1 -r HIBERNATION
+
+
+if [[ -n "$HIBERNATION" ]]; then
+  echo -e
+fi
 }
 
 bootloader_prompt(){
