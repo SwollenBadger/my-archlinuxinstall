@@ -1,4 +1,5 @@
 setting_hibernation_grub(){
+  echo -e 
   print_color $MAGENTA "Setting hibernation...\n"
 
   if [[ -z "$(grep "resume" $MOUNT_POINT/etc/default/grub)" ]]; then
@@ -40,6 +41,7 @@ setting_hibernation_grub(){
 }
 
 setting_hibernation_systemd(){
+  echo -e 
   print_color $MAGENTA "Setting hibernation...\n"
 
   if [[ -z "$(grep "resume" $MOUNT_POINT/boot/loader/entries/archlinux.conf)" ]]; then
