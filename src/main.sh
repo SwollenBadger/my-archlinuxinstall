@@ -171,7 +171,7 @@ grub(){
 
   ROOT_ID=$(blkid -s UUID -o value $ROOT_PARTITION)
 
-  grub-install --target=x86_64-efi --efi-directory=$ESP_MOUNT_POINT --boot-directory=$MOUNT_POINT/BOOT --bootloader-id=Archlinux
+  grub-install --target=x86_64-efi --efi-directory=$ESP_MOUNT_POINT --boot-directory=$MOUNT_POINT/boot --bootloader-id=Archlinux
 
   EXISTING_OPTIONS=$(grep "GRUB_CMDLINE_LINUX_DEFAULT" $MOUNT_POINT/etc/default/grub | grep -oP '(?<=\")[^\"]+(?=\")')
   NEW_OPTIONS="GRUB_CMDLINE_LINUX_DEFAULT=\"$EXISTING_OPTIONS splash\""
