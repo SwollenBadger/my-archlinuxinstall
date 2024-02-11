@@ -229,6 +229,8 @@ systemd(){
   echo "Operation = Upgrade" >> $MOUNT_POINT/etc/pacman.d/hooks/95-systemd-boot.hook
   echo "Target = systemd" >> $MOUNT_POINT/etc/pacman.d/hooks/95-systemd-boot.hook
 
+  echo -e "\n" >> $MOUNT_POINT/etc/pacman.d/hooks/95-systemd-boot.hook
+
   echo "[Action]" >> $MOUNT_POINT/etc/pacman.d/hooks/95-systemd-boot.hook
   echo "Description = Gracefully upgrading systemd-boot..." >> $MOUNT_POINT/etc/pacman.d/hooks/95-systemd-boot.hook
   echo "When = PostTransaction" >> $MOUNT_POINT/etc/pacman.d/hooks/95-systemd-boot.hook
