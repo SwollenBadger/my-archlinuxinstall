@@ -193,7 +193,7 @@ grub(){
   echo "initrd  /initramfs-linux.img" >> "$MOUNT_POINT/boot/loader/entries/archlinux.conf"
   echo "options root=UUID=$ROOT_ID rw log_level=3 quiet splash" >> "$ESP_MOUNT_POINT/loader/entries/archlinux.conf"
 
-  arch-chroot $MOUNT_POINT grub-mkconfig -o $ESP_MOUNT_POINT/grub/grub.cfg
+  arch-chroot $MOUNT_POINT grub-mkconfig -o /boot/grub/grub.cfg
 
   print_color $GREEN "Grub installed successfully.\n"
   sleep 3
