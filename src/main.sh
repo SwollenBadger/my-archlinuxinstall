@@ -37,10 +37,6 @@ setup_partition(){
   umount -l $MOUNT_POINT/boot/efi 2>/dev/null || true
   umount -l $MOUNT_POINT -R 2>/dev/null || true
 
-  if [[ $BOOTLOADER == "2" ]]; then
-    ESP_MOUNT_POINT="$MOUNT_POINT/boot"
-  fi
-
   delete_efi_entry "Linux Boot Manager"
   delete_efi_entry "Archlinux"  
 
@@ -86,7 +82,17 @@ setup_partition(){
     SWAP_PACKAGE=""
   fi
 
-  pacstrap $MOUNT_POINT $BASE_PACKAGE $BOOTLOADER_PACKAGE $MICROCODE_PACKAGE $SWAP_PACKAGE $NETWORK_PACKAGE $REFLECTOR_PACKAGE $PLYMOUTH_PACKAGE $FS_PACKAGE $AUDIO_PACKAGE $OTHER_PACKAGE 
+  pacstrap $MOUNT_POINT \
+   $BASE_PACKAGE \
+   $BOOTLOADER_PACKAGE \
+   $MICROCODE_PACKAGE \
+   $SWAP_PACKAGE \
+   $NETWORK_PACKAGE \
+   $REFLECTOR_PACKAGE \
+   $PLYMOUTH_PACKAGE \
+   $FS_PACKAGE \
+   $AUDIO_PACKAGE \
+   $OTHER_PACKAGE 
 
   cp $MOUNT_POINT/etc/pacman.conf /etc/pacman.conf.bak
   sed -i '/^#ParallelDownloads = 5/s/^#//' $MOUNT_POINT/etc/pacman.conf
@@ -165,7 +171,7 @@ grub(){
 
   ROOT_ID=$(blkid -s UUID -o value $ROOT_PARTITION)
 
-  grub-install --boot-directory=$MOUNT_POINT/boot --target=x86_64-efi --efi-directory=$ESP_MOUNT_POINT --bootloader-id=Archlinux
+  grub-install --target=x86_64-efi --efi-directory=$ESP_MOUNT_POINT --bootloader-id=Archlinux
 
   EXISTING_OPTIONS=$(grep "GRUB_CMDLINE_LINUX_DEFAULT" $MOUNT_POINT/etc/default/grub | grep -oP '(?<=\")[^\"]+(?=\")')
   NEW_OPTIONS="GRUB_CMDLINE_LINUX_DEFAULT=\"$EXISTING_OPTIONS splash\""
@@ -174,20 +180,20 @@ grub(){
   sed -i "s|^GRUB_CMDLINE_LINUX_DEFAULT.*|${NEW_OPTIONS}|" $MOUNT_POINT/etc/default/grub 
 
   # Add efistub for my hackintosh OpenLinuxBoot.efi
-  mkdir -p $ESP_MOUNT_POINT/loader/entries/
-  echo "title   Archlinux" > "$ESP_MOUNT_POINT/loader/entries/archlinux.conf"
-  echo "linux   /vmlinuz-linux" >> "$ESP_MOUNT_POINT/loader/entries/archlinux.conf"
+  mkdir -p $MOUNT_POINT/boot/loader/entries/
+  echo "title   Archlinux" > "$MOUNT_POINT/boot/loader/entries/archlinux.conf"
+  echo "linux   /vmlinuz-linux" >> "$MOUNT_POINT/boot/loader/entries/archlinux.conf"
   if [[ "$CPU_VENDOR" == "GenuineIntel" ]]; then
-    echo "initrd  /intel-ucode.img" >> "$ESP_MOUNT_POINT/loader/entries/archlinux.conf"
+    echo "initrd  /intel-ucode.img" >> "$MOUNT_POINT/boot/loader/entries/archlinux.conf"
   elif [[ "$CPU_VENDOR" == "AuthenticAMD" ]]; then
-    echo "initrd  /amd-ucode.img" >> "$ESP_MOUNT_POINT/loader/entries/archlinux.conf"
+    echo "initrd  /amd-ucode.img" >> "$MOUNT_POINT/boot/loader/entries/archlinux.conf"
   else
     print_color $YELLOW "Unknown cpu, no microcode installed\n"
   fi
-  echo "initrd  /initramfs-linux.img" >> "$ESP_MOUNT_POINT/loader/entries/archlinux.conf"
+  echo "initrd  /initramfs-linux.img" >> "$MOUNT_POINT/boot/loader/entries/archlinux.conf"
   echo "options root=UUID=$ROOT_ID rw log_level=3 quiet splash" >> "$ESP_MOUNT_POINT/loader/entries/archlinux.conf"
 
-  arch-chroot $MOUNT_POINT grub-mkconfig -o /boot/grub/grub.cfg
+  arch-chroot $MOUNT_POINT grub-mkconfig -o $ESP_MOUNT_POINT/grub/grub.cfg
 
   print_color $GREEN "Grub installed successfully.\n"
   sleep 3
@@ -195,6 +201,8 @@ grub(){
 
 systemd(){
   echo -e
+  ESP_MOUNT_POINT="$MOUNT_POINT/boot" # Override esp mount point
+
   print_color $MAGENTA "Installing systemd boot...\n"
 
   mkdir -p $MOUNT_POINT/etc/pacman.d/hooks 2>/dev/null

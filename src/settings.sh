@@ -4,24 +4,26 @@ setting_hibernation_grub(){
 
   if [[ -z "$(grep "resume" $MOUNT_POINT/etc/default/grub)" ]]; then
     EXISTING_OPTIONS=$(grep "GRUB_CMDLINE_LINUX_DEFAULT" $MOUNT_POINT/etc/default/grub | grep -oP '(?<=\")[^\"]+(?=\")')
+
     # For my hackintosh OpenLinuxBoot
     EXISTING_STUB_OPTIONS=$(grep "options" $MOUNT_POINT/boot/loader/entries/archlinux.conf | sed 's/^options //')
 
     if [[ $SWAP_PARTITION == "/swapfile" ]]; then
-      UUID=$(blkid -s UUID -o value $ROOT_PARTITION)
+      HIBERNATION_UUID=$(blkid -s UUID -o value $ROOT_PARTITION)
       RES_OFFSET=$(arch-chroot $MOUNT_POINT filefrag -v /swapfile | awk 'NR==4 {gsub(/[^0-9]/, "", $4); print $4}')
 
-      NEW_OPTIONS="GRUB_CMDLINE_LINUX_DEFAULT=\"$EXISTING_OPTIONS resume=UUID=$UUID resume_offset=$RES_OFFSET\""
+      NEW_OPTIONS="GRUB_CMDLINE_LINUX_DEFAULT=\"$EXISTING_OPTIONS resume=UUID=$HIBERNATION_UUID resume_offset=$RES_OFFSET\""
       # For my hackintosh OpenLinuxBoot
-      NEW_OPTIONS_STUB="options $EXISTING_STUB_OPTIONS resume=UUID=$UUID resume_offset=$RES_OFFSET"
+      NEW_OPTIONS_STUB="options $EXISTING_STUB_OPTIONS resume=UUID=$HIBERNATION_UUID resume_offset=$RES_OFFSET"
     else
-      UUID=$(blkid -s UUID -o value $SWAP_PARTITION)
-      NEW_OPTIONS="GRUB_CMDLINE_LINUX_DEFAULT=\"$EXISTING_OPTIONS resume=UUID=$UUID\""
+      HIBERNATION_UUID=$(blkid -s UUID -o value $SWAP_PARTITION)
+
+      NEW_OPTIONS="GRUB_CMDLINE_LINUX_DEFAULT=\"$EXISTING_OPTIONS resume=UUID=$HIBERNATION_UUID\""
       # For my hackintosh OpenLinuxBoot
-      NEW_OPTIONS_STUB="options $EXISTING_STUB_OPTIONS resume=UUID=$UUID"
+      NEW_OPTIONS_STUB="options $EXISTING_STUB_OPTIONS resume=UUID=$HIBERNATION_UUID"
     fi
 
-    if [ -z "$UUID" ]; then
+    if [ -z "$HIBERNATION_UUID" ]; then
       print_color $YELLOW "Failed to obtain UUID. Exiting."
       exit 1
     fi
@@ -32,7 +34,7 @@ setting_hibernation_grub(){
 
     sed -i '/^HOOKS=/s/udev/udev resume/' $MOUNT_POINT/etc/mkinitcpio.conf
 
-    arch-chroot $MOUNT_POINT grub-mkconfig -o /boot/grub/grub.cfg
+    arch-chroot $MOUNT_POINT grub-mkconfig -o $ESP_MOUNT_POINT/grub/grub.cfg
     print_color $GREEN "Successfully settings hibernation\n"
   else
     print_color $YELLOW "Hibernation already enabled\n"
@@ -42,27 +44,29 @@ setting_hibernation_grub(){
 
 setting_hibernation_systemd(){
   echo -e 
+  ESP_MOUNT_POINT="$MOUNT_POINT/boot" # Override esp mount point
+
   print_color $MAGENTA "Setting hibernation...\n"
 
-  if [[ -z "$(grep "resume" $MOUNT_POINT/boot/loader/entries/archlinux.conf)" ]]; then
-    EXISTING_OPTIONS=$(grep "options" $MOUNT_POINT/boot/loader/entries/archlinux.conf | sed 's/^options //')
+  if [[ -z "$(grep "resume" $ESP_MOUNT_POINT/loader/entries/archlinux.conf)" ]]; then
+    EXISTING_OPTIONS=$(grep "options" $ESP_MOUNT_POINT/loader/entries/archlinux.conf | sed 's/^options //')
 
     if [[ $SWAP_PARTITION == "/swapfile" ]]; then
-      UUID=$(blkid -s UUID -o value $ROOT_PARTITION)
+      HIBERNATION_UUID=$(blkid -s UUID -o value $ROOT_PARTITION)
       RES_OFFSET=$(arch-chroot $MOUNT_POINT filefrag -v /swapfile | awk 'NR==4 {gsub(/[^0-9]/, "", $4); print $4}')
 
-      NEW_OPTIONS="options $EXISTING_OPTIONS resume=UUID=$UUID resume_offset=$RES_OFFSET"
+      NEW_OPTIONS="options $EXISTING_OPTIONS resume=UUID=$HIBERNATION_UUID resume_offset=$RES_OFFSET"
     else
-      UUID=$(blkid -s UUID -o value $SWAP_PARTITION)
-      NEW_OPTIONS="options $EXISTING_OPTIONS resume=UUID=$UUID"
+      HIBERNATION_UUID=$(blkid -s UUID -o value $SWAP_PARTITION)
+      NEW_OPTIONS="options $EXISTING_OPTIONS resume=UUID=$HIBERNATION_UUID"
     fi
 
-    if [ -z "$UUID" ]; then
+    if [ -z "$HIBERNATION_UUID" ]; then
       print_color $YELLOW "Failed to obtain UUID for hibernation. Exiting."
       exit 1
     fi
 
-    sed -i "s|^options.*|${NEW_OPTIONS}|" $MOUNT_POINT/boot/loader/entries/archlinux.conf
+    sed -i "s|^options.*|${NEW_OPTIONS}|" $ESP_MOUNT_POINT/loader/entries/archlinux.conf
     sed -i "/^HOOKS=/s/udev/udev resume/" $MOUNT_POINT/etc/mkinitcpio.conf
 
     print_color $GREEN "Successfully settings hibernation\n"
