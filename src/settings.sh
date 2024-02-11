@@ -34,7 +34,7 @@ setting_hibernation_grub(){
 
     sed -i '/^HOOKS=/s/udev/udev resume/' $MOUNT_POINT/etc/mkinitcpio.conf
 
-    arch-chroot $MOUNT_POINT grub-mkconfig -o $ESP_MOUNT_POINT/grub/grub.cfg
+    arch-chroot $MOUNT_POINT grub-mkconfig -o /boot/grub/grub.cfg
     print_color $GREEN "Successfully settings hibernation\n"
   else
     print_color $YELLOW "Hibernation already enabled\n"
