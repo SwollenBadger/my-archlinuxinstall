@@ -39,7 +39,7 @@ setup_partition(){
 
   if [[ $BOOTLOADER == "2" ]]; then
     ESP_MOUNT_POINT="$MOUNT_POINT/boot"
-  else
+  fi
 
   delete_efi_entry "Linux Boot Manager"
   delete_efi_entry "Archlinux"  
