@@ -21,6 +21,8 @@ prep(){
     sed -i '/^#ParallelDownloads = 5/s/^#//' /etc/pacman.conf
     sed -i.bak '/^#[[:space:]]*\[multilib\]/,/^#[[:space:]]*Include = \/etc\/pacman.d\/mirrorlist/s/^#//' /etc/pacman.conf
 
+    mkdir -p $MOUNT_POINT/etc/pacman.d/hooks 2>/dev/null
+
     pacman -Sy
   fi
 
@@ -161,7 +163,7 @@ adduser(){
 
 grub(){
   echo -e
-  print_color $MAGENTA "Mounting efi parition...\n"
+  print_color $MAGENTA "Installing grub...\n"
 
   ROOT_ID=$(blkid -s UUID -o value $ROOT_PARTITION)
 
@@ -195,14 +197,14 @@ grub(){
 
 systemd(){
   echo -e
-  print_color $MAGENTA "Mounting efi parition\n"
+  print_color $MAGENTA "Installing systemd boot...\n"
 
   if [ ! -d "$ESP_MOUNT_POINT" ]; then
     echo "EFI System Partition (ESP) not found at $ESP_MOUNT_POINT. Adjust the mount point."
     exit 1
   fi
 
-  bootctl --esp-path=$ESP_MOUNT_POINT --boot-path=$MOUNT_POINT/boot --root=$MOUNT_POINT install || true
+  bootctl --esp-path=$ESP_MOUNT_POINT install || true
 
   echo "default archlinux*" > "$ESP_MOUNT_POINT/loader/loader.conf"
   echo "timeout 5" >> "$ESP_MOUNT_POINT/loader/loader.conf"
@@ -221,6 +223,16 @@ systemd(){
   fi
   echo "initrd  /initramfs-linux.img" >> "$ESP_MOUNT_POINT/loader/entries/archlinux.conf"
   echo "options root=UUID=$ROOT_ID rw log_level=3 quiet splash" >> "$ESP_MOUNT_POINT/loader/entries/archlinux.conf"
+
+  echo "[Trigger]" > $MOUNT_POINT/etc/pacman.d/hooks/95-systemd-boot.hook
+  echo "Type = Package" >> $MOUNT_POINT/etc/pacman.d/hooks/95-systemd-boot.hook
+  echo "Operation = Upgrade" >> $MOUNT_POINT/etc/pacman.d/hooks/95-systemd-boot.hook
+  echo "Target = systemd" >> $MOUNT_POINT/etc/pacman.d/hooks/95-systemd-boot.hook
+
+  echo "[Action]" >> $MOUNT_POINT/etc/pacman.d/hooks/95-systemd-boot.hook
+  echo "Description = Gracefully upgrading systemd-boot..." >> $MOUNT_POINT/etc/pacman.d/hooks/95-systemd-boot.hook
+  echo "When = PostTransaction" >> $MOUNT_POINT/etc/pacman.d/hooks/95-systemd-boot.hook
+  echo "Exec = /usr/bin/systemctl restart systemd-boot-update.service" >> $MOUNT_POINT/etc/pacman.d/hooks/95-systemd-boot.hook
 
   rm -rf $ESP_MOUNT_POINT/EFI/Linux
   print_color $GREEN "Systemd-boot installed successfully.\n"

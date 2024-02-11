@@ -32,9 +32,9 @@ setting_hibernation_grub(){
     sed -i '/^HOOKS=/s/udev/udev resume/' $MOUNT_POINT/etc/mkinitcpio.conf
 
     arch-chroot $MOUNT_POINT grub-mkconfig -o /boot/grub/grub.cfg
-    print_color $GREEN "Hybrid suspend enabled successfully. Reboot your system to apply the changes."
+    print_color $GREEN "Successfully settings hibernation\n"
   else
-    print_color $YELLOW "Hybrid suspend already enabled\n"
+    print_color $YELLOW "Hibernation already enabled\n"
   fi
   sleep 3
 }
@@ -63,9 +63,9 @@ setting_hibernation_systemd(){
     sed -i "s|^options.*|${NEW_OPTIONS}|" $MOUNT_POINT/boot/loader/entries/archlinux.conf
     sed -i "/^HOOKS=/s/udev/udev resume/" $MOUNT_POINT/etc/mkinitcpio.conf
 
-    print_color $GREEN "Hybrid suspend enabled successfully. Reboot your system to apply the changes."
+    print_color $GREEN "Successfully settings hibernation\n"
   else
-    print_color $YELLOW "Hybrid suspend already enabled\n"
+    print_color $YELLOW "Hibernation already enabled\n"
     exit 0
   fi
 }
