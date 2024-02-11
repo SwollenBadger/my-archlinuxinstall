@@ -33,9 +33,9 @@ setup_partition(){
   print_color $MAGENTA "Preparing your partition... \n"
   sleep 3
 
-  umount $ESP_MOUNT_POINT 2>/dev/null || true
-  umount $MOUNT_POINT/boot/efi 2>/dev/null || true
-  umount $MOUNT_POINT -R 2>/dev/null || true
+  umount -l $ESP_MOUNT_POINT 2>/dev/null || true
+  umount -l $MOUNT_POINT/boot/efi 2>/dev/null || true
+  umount -l $MOUNT_POINT -R 2>/dev/null || true
 
   if [[ $BOOTLOADER == "2" ]]; then
     ESP_MOUNT_POINT="$MOUNT_POINT/boot"
