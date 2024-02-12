@@ -49,6 +49,7 @@ setup_partition(){
   mount $EFI_PARTITION $ESP_MOUNT_POINT --mkdir
 
   rm -rf $MOUNT_POINT/boot/{EFI/systemd,EFI/Archlinux,*.img,loader,vmlinuz-linux,grub} 2>/dev/null || true
+  rm -rf $MOUNT_POINT/boot/efi/{EFI/systemd,EFI/Archlinux,*.img,loader,vmlinuz-linux,grub} 2>/dev/null || true
   rm -rf $ESP_MOUNT_POINT/{EFI/systemd,EFI/Archlinux,*.img,loader,vmlinuz-linux,grub} 2>/dev/null || true
 
   BASE_PACKAGE="base base-devel sudo linux linux-headers linux-firmware openssl"
