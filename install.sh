@@ -53,7 +53,7 @@ bootloader
 setting_swap
 setting_powerbutton
 if [[ -n "$BLUETOOTH_USB" ]] || [[ -n "$BLUETOOTH_PCI" ]]; then
-  systemctl enable bluetooth
+  arch-chroot $MOUNT_POINT systemctl enable bluetooth
 fi
 setting_reflector
 if [[ -z "$(grep "plymouth" $MOUNT_POINT/etc/mkinitcpio.conf)" ]]; then
