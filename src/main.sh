@@ -60,6 +60,10 @@ setup_partition(){
   AUDIO_PACKAGE="pipewire pipewire-pulse pipewire-jack pipewire-alsa wireplumber"
   OTHER_PACKAGE="git vim zsh"
 
+  if [[ -n "$BLUETOOTH_USB" ]] || [[ -n "$BLUETOOTH_PCI" ]]; then
+    BLUETOOTH_PACAKGE="bluez bluez-utils blueman"
+  fi
+  
   if [[ $BOOTLOADER == "1" ]]; then
     BOOTLOADER_PACKAGE="grub os-prober efibootmgr dosfstools mtools"
   elif [[ $BOOTLOADER == "2" ]]; then
@@ -93,6 +97,7 @@ setup_partition(){
    $PLYMOUTH_PACKAGE \
    $FS_PACKAGE \
    $AUDIO_PACKAGE \
+   $BLUETOOTH_PACAKGE \
    $OTHER_PACKAGE 
 
   cp $MOUNT_POINT/etc/pacman.conf /etc/pacman.conf.bak
