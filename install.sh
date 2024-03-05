@@ -8,8 +8,8 @@ source "./src/settings.sh"
 set -e
 
 if [[ $EUID -ne 0 ]]; then
-  echo "This script must be run as root. Exiting."
-  exit 1
+    echo "This script must be run as root. Exiting."
+    exit 1
 fi
 
 # --------- Fist step --------- #
@@ -30,10 +30,10 @@ swap_method_prompt
 efi_partition_prompt
 root_partition_prompt
 if [[ "$SWAP_METHOD" == "1" ]];then
-  swap_partition_prompt
-  hibernation_prompt
+    swap_partition_prompt
+    hibernation_prompt
 else
-  HIBERNATION="n"
+    HIBERNATION="n"
 fi
 
 # --------- Fifth step --------- #
@@ -53,15 +53,17 @@ bootloader
 setting_swap
 setting_powerbutton
 if [[ -n "$BLUETOOTH_USB" ]] || [[ -n "$BLUETOOTH_PCI" ]]; then
-  arch-chroot $MOUNT_POINT systemctl enable bluetooth
+    arch-chroot $MOUNT_POINT systemctl enable bluetooth
 fi
 setting_reflector
 if [[ -z "$(grep "plymouth" $MOUNT_POINT/etc/mkinitcpio.conf)" ]]; then
-  plymouth
+    plymouth
 fi
 
 arch-chroot $MOUNT_POINT mkinitcpio -P
-
+if [[ "$BOOTLOADER" == "1" ]]; then
+    arch-chroot $MOUNT_POINT grub-mkconfig -o /boot/grub/grub.cfg
+fi
 genfstab -t UUID $MOUNT_POINT >> $MOUNT_POINT/etc/fstab
 
 rm -rf $(pwd)
