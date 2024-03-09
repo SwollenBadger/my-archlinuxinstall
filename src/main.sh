@@ -185,15 +185,15 @@ function grub() {
     sed -i 's/^#GRUB_DISABLE_OS_PROBER=/GRUB_DISABLE_OS_PROBER=/' $MOUNT_POINT/etc/default/grub
     sed -i "s|^GRUB_CMDLINE_LINUX_DEFAULT.*|${NEW_OPTIONS}|" $MOUNT_POINT/etc/default/grub
 
-    echo -e "menuentry \"Shutdown\" {" >> /etc/grub.d/40_custom
-    echo -e "	echo \"System shutting down...\"" >> /etc/grub.d/40_custom
-    echo -e "	halt" >> /etc/grub.d/40_custom
-    echo -e "}" >> /etc/grub.d/40_custom
+    echo -e "menuentry \"Shutdown\" {" >> $MOUNT_POINT/etc/grub.d/40_custom
+    echo -e "	echo \"System shutting down...\"" >> $MOUNT_POINT/etc/grub.d/40_custom
+    echo -e "	halt" >> $MOUNT_POINT/etc/grub.d/40_custom
+    echo -e "}" >> $MOUNT_POINT/etc/grub.d/40_custom
 
-    echo -e "menuentry \"Restart\" {" >> /etc/grub.d/40_custom
-    echo -e "	echo \"System restarting...\"" >> /etc/grub.d/40_custom
-    echo -e "	reboot" >> /etc/grub.d/40_custom
-    echo -e "}" >> /etc/grub.d/40_custom
+    echo -e "menuentry \"Restart\" {" >> $MOUNT_POINT/etc/grub.d/40_custom
+    echo -e "	echo \"System restarting...\"" >> $MOUNT_POINT/etc/grub.d/40_custom
+    echo -e "	reboot" >> $MOUNT_POINT/etc/grub.d/40_custom
+    echo -e "}" >> $MOUNT_POINT/etc/grub.d/40_custom
 
     # Add efistub for my hackintosh OpenLinuxBoot.efi
     mkdir -p $MOUNT_POINT/boot/loader/entries/
