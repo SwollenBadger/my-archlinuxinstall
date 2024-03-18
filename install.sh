@@ -66,4 +66,5 @@ if [[ "$BOOTLOADER" == "1" ]]; then
 fi
 genfstab -t UUID $MOUNT_POINT >> $MOUNT_POINT/etc/fstab
 
+print_color $GREEN "Install success\n"
 rm -rf $(pwd)
