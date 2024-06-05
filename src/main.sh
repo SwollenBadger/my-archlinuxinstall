@@ -95,6 +95,7 @@ function setup_partition() {
     fi
 
     pacstrap $MOUNT_POINT \
+        $KRNL_PACKAGE \
         $BASE_PACKAGE \
         $BOOTLOADER_PACKAGE \
         $MICROCODE_PACKAGE \
