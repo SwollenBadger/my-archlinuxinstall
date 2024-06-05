@@ -52,7 +52,14 @@ function setup_partition() {
     rm -rf $MOUNT_POINT/boot/efi/{EFI/systemd,EFI/Archlinux,*.img,loader,vmlinuz-linux,grub} 2>/dev/null || true
     rm -rf $ESP_MOUNT_POINT/{EFI/systemd,EFI/Archlinux,*.img,loader,vmlinuz-linux,grub} 2>/dev/null || true
 
-    BASE_PACKAGE="base base-devel sudo linux linux-headers linux-firmware openssl"
+    if [[ $BOOTLOADER == "1" ]]; then
+        KRNL_PACKAGE="linux linux-headers"
+    elif [[ $BOOTLOADER == "2" ]]; then
+        KRNL_PACKAGE="linux-zen linux-zen-headers"
+    else
+        error "Failed to get kernel"
+    fi
+    BASE_PACKAGE="base base-devel sudo linux-firmware openssl"
     NETWORK_PACKAGE="networkmanager nm-connection-editor wpa_supplicant wireless_tools netctl openssh"
     REFLECTOR_PACKAGE="reflector pacman-contrib"
     PLYMOUTH_PACKAGE="plymouth"
@@ -206,7 +213,15 @@ function grub() {
     else
         print_color $YELLOW "Unknown cpu, no microcode installed\n"
     fi
-    echo "initrd  /initramfs-linux.img" >> "$MOUNT_POINT/boot/loader/entries/archlinux.conf"
+
+    if [[ $KRNL == "1" ]];then
+        echo "initrd  /initramfs-linux.img" >> "$MOUNT_POINT/boot/loader/entries/archlinux.conf"
+    elif [[ $KRNL == "2" ]]; then
+        echo "initrd  /initramfs-linux-zen.img" >> "$MOUNT_POINT/boot/loader/entries/archlinux.conf"
+    else 
+        error "Failed to get kernel"
+    fi
+
     echo "options root=UUID=$ROOT_ID rw log_level=3 quiet splash" >> "$ESP_MOUNT_POINT/loader/entries/archlinux.conf"
 
     print_color $GREEN "Grub installed successfully.\n"
@@ -243,7 +258,15 @@ function systemd() {
     else
         print_color $YELLOW "Unknown cpu, no microcode installed\n"
     fi
-    echo "initrd  /initramfs-linux.img" >> "$ESP_MOUNT_POINT/loader/entries/archlinux.conf"
+
+    if [[ $KRNL == "1" ]];then
+        echo "initrd  /initramfs-linux.img" >> "$ESP_MOUNT_POINT/loader/entries/archlinux.conf"
+    elif [[ $KRNL == "2" ]]; then
+        echo "initrd  /initramfs-linux-zen.img" >> "$MOUNT_POINT/boot/loader/entries/archlinux.conf"
+    else 
+        error "Failed to get kernel"
+    fi
+
     echo "options root=UUID=$ROOT_ID rw log_level=3 quiet splash" >> "$ESP_MOUNT_POINT/loader/entries/archlinux.conf"
 
     echo "[Trigger]" > $MOUNT_POINT/etc/pacman.d/hooks/95-systemd-boot.hook

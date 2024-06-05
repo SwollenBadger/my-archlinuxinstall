@@ -36,8 +36,28 @@ function timezone_prompt() {
     echo -e
 }
 
+function kernel_prompt(){
+    print_color $WHITE "1) Linux\n"
+    print_color $WHITE "2) Linux-zen\n"
+    print_color $CYAN "=> Choose your swap method, pick other if you don't want to swap(1/2): "
+    read -n1 -r KRNL
+
+    if [[ -z "$KRNL" ]]; then
+        error "This option cannot be empty, run script again\n"
+        exit 0
+    fi
+
+    if [[ ! "$KRNL" =~ [12] ]]; then
+        echo -e
+        error "Option must be 1/2\n"
+        exit 0
+    fi
+}
+
 function user_prompt() {
     # -- Create username
+    echo -e
+    echo -e
     print_color $CYAN "=> Enter your username: "
     read USERNAME
     if [[ -z "$USERNAME" ]]; then
@@ -122,7 +142,7 @@ function swap_method_prompt() {
     # -- Select The way swap
     print_color $WHITE "1) SWAP\n"
     print_color $WHITE "2) Zram\n"
-    print_color $CYAN "=> Choose your swap method, pick other if you don't want to swap: "
+    print_color $CYAN "=> Choose your swap method, pick other if you don't want to swap(1/2): "
     read -n1 -r SWAP_METHOD
 
     if [[ ! "$SWAP_METHOD" =~ [12] ]]; then
@@ -182,7 +202,15 @@ function bootloader_prompt() {
 
 function print_summary() {
     clear
-    echo -e
+    print_color $GREEN "Kernel: "
+    if [[ "$KRNL" == "1" ]]; then
+        echo -e "Linux"
+    elif [[ "$KRNL" == "2" ]]; then
+        echo "Linux zen"
+    else
+        echo -e "No"
+    fi
+
     print_color $GREEN "Timezone: "
     echo -e "$TIME_ZONE"
 

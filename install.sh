@@ -20,6 +20,7 @@ timezone_prompt
 # --------- Third step --------- #
 clear
 print_color $GREEN "\n#------------------------------------------------------------------------------------------------#\n"
+kernel_prompt
 user_prompt
 user_password_prompt
 root_password_prompt
